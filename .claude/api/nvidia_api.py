@@ -194,7 +194,11 @@ class NVIDIAAPIClient:
                     delta = chunk["choices"][0].get("delta", {})
                     if "content" in delta:
                         result += delta["content"]
-                        print(delta["content"], end="", flush=True)
+                        try:
+                            print(delta["content"], end="", flush=True)
+                        except UnicodeEncodeError:
+                            # Handle Unicode characters in console output
+                            print(delta["content"].encode('utf-8', errors='replace').decode('utf-8'), end="", flush=True)
             print()  # Newline after streaming
             return result
         else:
