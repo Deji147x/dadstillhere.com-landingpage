@@ -69,6 +69,14 @@ class VoltixIOMarketingEngine:
         print("PHASE 1: AI CONTENT GENERATION (LLaMA 4 Maverick)")
         print("=" * 70)
 
+        # Set UTF-8 encoding for this session if possible
+        import sys
+        if hasattr(sys.stdout, 'reconfigure'):
+            try:
+                sys.stdout.reconfigure(encoding='utf-8')
+            except:
+                pass
+
         # Craft prompt based on content type
         prompts = {
             "engagement": f"""Create an engaging social media post for {self.brand_name} ({self.website}) about {topic}.
@@ -155,7 +163,13 @@ class VoltixIOMarketingEngine:
 
             print(f"\n[SUCCESS] Content Generated")
             print(f"\nGenerated Content:\n")
-            print(generated_text)
+            # Handle Unicode/emoji encoding for console output
+            try:
+                print(generated_text)
+            except UnicodeEncodeError:
+                # Fallback: print without emoji
+                safe_text = generated_text.encode('ascii', 'replace').decode('ascii')
+                print(safe_text)
             print("\n" + "=" * 70)
 
             return content
