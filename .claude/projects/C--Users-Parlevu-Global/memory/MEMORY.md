@@ -3,7 +3,8 @@
 - [feedback_brand_spelling.md](feedback_brand_spelling.md) — brand is always "VoltixIO" (capital IO) in text; URLs stay lowercase
 
 - [project_voltixio_hosting.md](project_voltixio_hosting.md) — voltixio.com apex+/blog on HOSTINGER (not VPS); GHL pipeline IDs; pit- tokens are v2-only
-- [project_voltixio_working_dirs.md](project_voltixio_working_dirs.md) — voltixio-site has 2 clones; new work goes in Downloads copy; VPS is CPU-only (no GPU)
+- [project_voltixio_working_dirs.md](project_voltixio_working_dirs.md) — voltixio-site has 2 clones that have DIVERGED; home copy is current, Downloads is behind; VPS is CPU-only (no GPU)
+- [project_voltixio_head_injection.md](project_voltixio_head_injection.md) — 3 separate `<head>` surfaces on voltixio.com; WPCode silently fails, use mu-plugins
 
 - [project_voltixio_blog_deployed.md](project_voltixio_blog_deployed.md) — 50 unique posts standardized & live at voltixio.com/blog/ (2026-07-09); pending: cache purge, GSC, socials; LiteSpeed object-cache gotcha
 - [project_voltixio_mcp.md](project_voltixio_mcp.md) — VoltixIO MCP server: GHL creds, pipeline stage IDs, local path, build status
