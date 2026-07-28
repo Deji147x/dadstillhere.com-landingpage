@@ -85,6 +85,13 @@ ExpiresByType font/woff2 A31557600
 # Static landing page serves the root URL; WordPress handles all other paths
 DirectoryIndex index.html index.php
 
+# Clean intake URL: /intake/ internally serves the static form (no redirect,
+# URL stays voltixio.com/intake/). Must run before the WordPress block.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^intake/?$ /intake.html [L]
+</IfModule>
+
 # Disable directory listings
 Options -Indexes
 

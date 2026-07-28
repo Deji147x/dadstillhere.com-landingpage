@@ -12,3 +12,4 @@
 - [feedback_dry_run.md](feedback_dry_run.md) — Never flip DRY_RUN=false without explicit user approval
 - [project_voltixio_website_restore.md](project_voltixio_website_restore.md) — Landing page LIVE at voltixio.com; source voltixio-site/index.html, repo github.com/Deji147x/voltixio-site; home repo must never be pushed (secret in history)
 - [project_parlevu_hosting.md](project_parlevu_hosting.md) — parlevugloballlc.com is on Hostinger; GitHub push does NOT go live yet (no auto-deploy wired up)
+- [project_parlevu_deploy_broken.md](project_parlevu_deploy_broken.md) — Hostinger SSH deploy broken 2026-07-28 (publickey denied); SEO fixes on GitHub but NOT live; user must re-add SSH key in hPanel

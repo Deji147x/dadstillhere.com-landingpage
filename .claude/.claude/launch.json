@@ -4,8 +4,49 @@
     {
       "name": "voltixio-site",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "C:\\Users\\Parlevu_Global\\voltixio-site"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "C:\\Users\\Parlevu_Global\\voltixio-site"
+      ],
       "port": 8765
+    },
+    {
+      "name": "parlevu-site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8742",
+        "--directory",
+        "C:\\Users\\Parlevu_Global\\parlevu-global-services-llc"
+      ],
+      "port": 8742
+    },
+    {
+      "name": "techbrief",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "C:\\Users\\Parlevu_Global\\techbrief.voltixio.com\\apps\\techbrief",
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "intake-form",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8321",
+        "--directory",
+        "C:\\Users\\Parlevu_Global\\Downloads\\voltixio-site"
+      ],
+      "port": 8321
     }
   ]
 }
