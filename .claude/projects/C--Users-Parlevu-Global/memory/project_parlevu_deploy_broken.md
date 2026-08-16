@@ -5,11 +5,11 @@ metadata:
   node_type: memory
   type: project
   originSessionId: ebd1cf4c-e497-48d1-a1fb-cb218af94486
-  modified: 2026-07-28T18:31:25.049Z
+  modified: 2026-07-28T18:50:13.906Z
 ---
 
-As of 2026-07-28, `git push origin main` (ssh://u628828002@82.197.80.123:65002/~/repos/parlevu.git) fails with "Permission denied (publickey,password)". User mentioned a hosting "purged location updated" — server may have moved or SSH keys reset. Local key: `~/.ssh/id_ed25519` (pub key comment info@voltixio.com).
+2026-07-28: Hostinger migrated the account to a NEW server: `us-bos-web1535.main-hosting.eu` = 82.197.82.42 (was 82.197.80.123), port 65002, user u628828002. The migration wiped the old SSH authorized_keys, the bare repo `~/repos/parlevu.git`, and the post-receive deploy hook — direct git push deploy is dead.
 
-**Why:** SEO fixes (single-H1 across 95 pages, sitemap rebuilt to 101 URLs, canonical fix, new MD guide post) are committed on GitHub (`c1547ae`) but NOT deployed to the live site — the live sitemap is still the stale 36-URL version.
+**New deploy model (in progress):** repo is PUBLIC on GitHub, so Hostinger hPanel → Advanced → GIT can pull it directly (no deploy key). `main` branch upstream now tracks `github/main` so the daily publish cron's bare `git push` goes to GitHub. Pending user action: create the Git deployment in hPanel (repo URL https://github.com/Deji147x/parlevu-global-services-llc, branch main, dir blank = public_html; Hostinger requires target dir empty on first deploy) and add the auto-deploy webhook to GitHub repo settings.
 
-**How to apply:** Before any Parlevu deploy, test `ssh -p 65002 u628828002@82.197.80.123`. Fix path: user re-adds the id_ed25519.pub key in Hostinger hPanel → Advanced → SSH Access, or updates the remote URL if the server IP/port changed. Then push origin main to deploy the pending fixes. Related: [[project-parlevu-hosting]]
+**How to apply:** Deploys = push to `github` remote. Don't rely on `origin` (updated to new IP but no repo exists server-side). SEO fixes commit `c1547ae` is on GitHub awaiting first pull-deploy. Related: [[project-parlevu-hosting]]
