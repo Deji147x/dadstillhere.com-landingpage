@@ -1,0 +1,586 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== USER & AUTHENTICATION =====
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  emailVerified       DateTime?
+  hashedPassword      String?
+  name                String?
+  avatar              String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Roles
+  isAdmin             Boolean   @default(false)
+  isModerator         Boolean   @default(false)
+
+  // Relationships
+  publicProfile       PublicProfile?
+  letters             Letter[]
+  journalEntries      JournalEntry[]
+  stories             Story[]
+  communityResponses  CommunityResponse[]
+  newsletterSubscriber NewsletterSubscriber?
+  consentRecords      ConsentRecord[]
+  auditLogs           AuditLog[]
+  reports             Report[]
+  moderationCases     LetterModeration[]
+  recipientShares     RecipientShare[]
+
+  @@index([email])
+}
+
+model PublicProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName     String
+  isAnonymous     Boolean   @default(false)
+  avatarUrl       String?
+  bio             String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relationships
+  communityResponses CommunityResponse[]
+
+  @@index([userId])
+}
+
+// ===== LETTERS =====
+model Letter {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String?
+  content         String    @db.Text
+  visibility      LetterVisibility @default(PRIVATE)
+  template        LetterTemplate?
+  status          LetterStatus @default(DRAFT)
+  authorAnonymity String?   // "A Dad, Somewhere"
+
+  // For shared letters
+  recipientEmail  String?
+  expiresAt       DateTime?
+  shareToken      String?   @unique
+
+  // Metadata
+  wordCount       Int       @default(0)
+  readTime        Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  publishedAt     DateTime?
+
+  // Relationships
+  moderation      LetterModeration?
+  recipientShares RecipientShare[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([visibility])
+}
+
+model LetterModeration {
+  id              String    @id @default(cuid())
+  letterId        String    @unique
+  letter          Letter    @relation(fields: [letterId], references: [id], onDelete: Cascade)
+
+  status          ModerationStatus @default(PENDING)
+  issues          ModerationIssue[]
+
+  moderatorId     String?
+  rejectionReason String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([moderatorId])
+}
+
+model ModerationIssue {
+  id              String    @id @default(cuid())
+  moderationId    String
+  moderation      LetterModeration @relation(fields: [moderationId], references: [id], onDelete: Cascade)
+
+  type            ModerationIssueType
+  text            String
+  lineNumber      Int?
+  suggestion      String?
+  isResolved      Boolean   @default(false)
+
+  @@index([moderationId])
+}
+
+// ===== JOURNAL =====
+model JournalEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String?
+  content         String    @db.Text
+  tags            String[]  @default([])
+  relationshipCategory String?
+  mood            String?
+
+  isEncrypted     Boolean   @default(true)
+  wordCount       Int       @default(0)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ===== STORIES =====
+model Story {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  excerpt         String    @db.Text
+  content         String    @db.Text
+  heroImage       String?
+  videoUrl        String?
+
+  category        StoryCategory
+  author          String?
+  isAnonymous     Boolean   @default(true)
+  readTime        Int       @default(0)
+
+  status          PublishStatus @default(DRAFT)
+  createdAt       DateTime  @default(now())
+  publishedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  viewCount       Int       @default(0)
+
+  // Relations
+  relatedLetters  Letter[]  @relation("StoryToLetters")
+  relatedVideos   Video[]   @relation("StoryToVideos")
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+}
+
+// ===== VIDEOS =====
+model Video {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String    @db.Text
+  youtubeId       String    @unique
+
+  category        VideoCategory
+  thumbnail       String?
+  duration        Int       // in seconds
+  transcript      String?   @db.Text
+  chapters        VideoChapter[]
+
+  publishedAt     DateTime
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  viewCount       Int       @default(0)
+
+  // Relations
+  relatedStories  Story[]   @relation("StoryToVideos")
+  relatedLetters  Letter[]  @relation("VideoToLetters")
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([category])
+  @@index([publishedAt])
+}
+
+model VideoChapter {
+  id              String    @id @default(cuid())
+  videoId         String
+  video           Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  timestamp       Int       // in seconds
+  title           String
+  description     String?
+
+  @@index([videoId])
+}
+
+// ===== ARTICLES & PILLAR PAGES =====
+model Article {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  excerpt         String    @db.Text
+  content         String    @db.Text
+
+  category        String
+  tags            String[]  @default([])
+
+  seoTitle        String?
+  seoDescription  String?
+  keywordFocus    String?
+  searchIntent    String?
+
+  pillarPageId    String?
+  pillarPage      PillarPage? @relation(fields: [pillarPageId], references: [id])
+
+  author          String?
+  readTime        Int       @default(0)
+  status          PublishStatus @default(DRAFT)
+
+  createdAt       DateTime  @default(now())
+  publishedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+  viewCount       Int       @default(0)
+
+  // Relations
+  relatedArticles Article[] @relation("ArticleToArticle")
+  relatedFromArticles Article[] @relation("ArticleToArticle")
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([status])
+  @@index([pillarPageId])
+  @@index([slug])
+}
+
+model PillarPage {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String    @db.Text
+  content         String    @db.Text
+
+  seoTitle        String?
+  seoDescription  String?
+
+  status          PublishStatus @default(DRAFT)
+  createdAt       DateTime  @default(now())
+  publishedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  supportingArticles Article[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([status])
+}
+
+// ===== COMMUNITY =====
+model CommunityPrompt {
+  id              String    @id @default(cuid())
+  question        String
+  description     String?   @db.Text
+  frequency       Frequency @default(WEEKLY)
+
+  startDate       DateTime
+  endDate         DateTime
+  status          PromptStatus @default(ACTIVE)
+
+  responseCount   Int       @default(0)
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  responses       CommunityResponse[]
+
+  @@index([status])
+  @@index([startDate])
+}
+
+model CommunityResponse {
+  id              String    @id @default(cuid())
+  promptId        String
+  prompt          CommunityPrompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  publicProfileId String
+  publicProfile   PublicProfile @relation(fields: [publicProfileId], references: [id], onDelete: Cascade)
+
+  content         String    @db.Text
+  isAnonymous     Boolean   @default(true)
+  status          ModerationStatus @default(PENDING)
+
+  likeCount       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([promptId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ===== NEWSLETTER =====
+model NewsletterSubscriber {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  status          SubscriberStatus @default(PENDING)
+  confirmToken    String?   @unique
+  unsubscribeToken String?  @unique
+
+  userId          String?
+  consentGiven    Boolean   @default(false)
+
+  createdAt       DateTime  @default(now())
+  confirmedAt     DateTime?
+
+  @@index([status])
+}
+
+model NewsletterIssue {
+  id              String    @id @default(cuid())
+  title           String
+  subject         String
+  content         String    @db.Text
+  status          IssueStatus @default(DRAFT)
+
+  sendAt          DateTime?
+  sentAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+}
+
+// ===== SHARING & PRIVACY =====
+model RecipientShare {
+  id              String    @id @default(cuid())
+  letterId        String
+  letter          Letter    @relation(fields: [letterId], references: [id], onDelete: Cascade)
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipientEmail  String
+  shareToken      String    @unique
+
+  createdAt       DateTime  @default(now())
+  expiresAt       DateTime
+  viewedAt        DateTime?
+  accessCount     Int       @default(0)
+
+  @@index([shareToken])
+  @@index([expiresAt])
+}
+
+model ConsentRecord {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            ConsentType
+  given           Boolean
+  timestamp       DateTime  @default(now())
+  ipAddress       String?
+
+  @@index([userId])
+  @@index([type])
+}
+
+// ===== MODERATION & REPORTS =====
+model Report {
+  id              String    @id @default(cuid())
+  contentType     ContentType
+  contentId       String
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reason          String
+  description     String?   @db.Text
+  status          ReportStatus @default(PENDING)
+
+  reviewedBy      String?
+  action          ReportAction?
+  createdAt       DateTime  @default(now())
+  reviewedAt      DateTime?
+
+  @@index([status])
+  @@index([contentType])
+}
+
+// ===== ANALYTICS =====
+model AnalyticsEvent {
+  id              String    @id @default(cuid())
+  eventType       String
+  sessionId       String
+
+  userId          String?
+  contentId       String?
+  contentType     String?
+
+  properties      Json?
+
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  referrer        String?
+
+  createdAt       DateTime  @default(now())
+
+  // Relations to content
+  letter          Letter?   @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  story           Story?    @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  video           Video?    @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  article         Article?  @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  pillarPage      PillarPage? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+
+  @@index([eventType])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ===== AUDIT LOGGING =====
+model AuditLog {
+  id              String    @id @default(cuid())
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action          String
+  resourceType    String
+  resourceId      String
+  changes         Json?
+
+  timestamp       DateTime  @default(now())
+
+  @@index([userId])
+  @@index([resourceType])
+  @@index([timestamp])
+}
+
+// ===== ENUMS =====
+enum LetterVisibility {
+  PRIVATE
+  PUBLIC
+  SHARED
+}
+
+enum LetterStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PUBLISHED
+}
+
+enum LetterTemplate {
+  DEAR_SON
+  DEAR_DAUGHTER
+  DEAR_CHILD
+  I_MISS_YOU
+  HAPPY_BIRTHDAY
+  WHAT_I_NEVER_SAID
+  IM_SORRY
+  IM_PROUD
+  IF_YOU_EVER_FIND
+  IF_WE_TALK_AGAIN
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EDIT_REQUESTED
+}
+
+enum ModerationIssueType {
+  NAME
+  EMAIL
+  PHONE
+  ADDRESS
+  SCHOOL
+  COURT_CASE
+  MINOR_DETAILS
+  THREAT
+  HARASSMENT
+}
+
+enum StoryCategory {
+  FATHERHOOD
+  MOTHERHOOD
+  ESTRANGEMENT
+  RECONNECTION
+  DIVORCE
+  SILENCE
+  HOPE
+  RECOVERY
+}
+
+enum VideoCategory {
+  THE_SILENCE
+  DEAR_CHILD
+  LONG_GAME
+  CHILDS_SIDE
+  PARENT_SURVIVED
+  OPEN_DOOR
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum PromptStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SubscriberStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+enum IssueStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+}
+
+enum ConsentType {
+  ANALYTICS
+  MARKETING
+  DATA_PROCESSING
+}
+
+enum ContentType {
+  LETTER
+  COMMENT
+  COMMUNITY_RESPONSE
+  STORY
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
+enum ReportAction {
+  APPROVED
+  REMOVED
+  WARNING
+}

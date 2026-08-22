@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="doorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4A574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A9B8E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="200" fill="#1A2847"/>
+
+  <!-- Door frame (left) -->
+  <rect x="50" y="40" width="60" height="120" fill="none" stroke="#D4A574" stroke-width="3"/>
+
+  <!-- Door (right) - slightly open -->
+  <path d="M 110 40 L 130 50 L 130 160 L 110 150 Z" fill="#F5F1ED" stroke="#D4A574" stroke-width="2"/>
+
+  <!-- Light coming through -->
+  <ellipse cx="120" cy="100" rx="25" ry="40" fill="#D4A574" opacity="0.4"/>
+
+  <!-- Heart accent -->
+  <path d="M 100 165 L 103 170 L 100 175 L 97 170 Z" fill="#D4A574"/>
+</svg>
