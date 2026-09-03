@@ -1,0 +1,62 @@
+{
+  "calendar": [
+    {
+      "post_id": 4,
+      "title": "Dad Adventures: Beach Days & Making Memories",
+      "publish_date": "2026-08-29",
+      "published_on": null,
+      "category": "Stories",
+      "featured_image": "dad-kids-beach-01.jpg",
+      "excerpt": "Sometimes the best moments aren't planned. A day at the beach with the kids, building sandcastles and making memories that last forever.",
+      "content_status": "draft",
+      "word_count": 800,
+      "author_anonymous": true,
+      "social_hashtags": ["#DadLife", "#FamilyFirst", "#BeachDays", "#QualityTime"],
+      "media_assets": [
+        "dad-kids-beach-01.jpg",
+        "dad-kids-beach-02.jpg",
+        "dad-toddler-beach-03.jpg"
+      ]
+    },
+    {
+      "post_id": 5,
+      "title": "The Power of Presence: Why Showing Up Matters",
+      "publish_date": "2026-09-05",
+      "published_on": null,
+      "category": "Stories",
+      "featured_image": "dad-toddler-beach-03.jpg",
+      "excerpt": "Being there for our kids doesn't always require grand gestures. Sometimes it's the simple act of holding their hand and being present.",
+      "content_status": "draft",
+      "word_count": 650,
+      "author_anonymous": true,
+      "social_hashtags": ["#Fatherhood", "#Presence", "#Parenting", "#DadStories"],
+      "media_assets": [
+        "dad-toddler-beach-03.jpg"
+      ]
+    },
+    {
+      "post_id": 6,
+      "title": "Teaching Kids to Embrace Adventure (Even When You're Scared)",
+      "publish_date": "2026-09-12",
+      "published_on": null,
+      "category": "Stories",
+      "featured_image": "dad-kids-beach-02.jpg",
+      "excerpt": "How do you encourage your kids to be brave when you're figuring it out yourself? A dad's guide to growing together.",
+      "content_status": "draft",
+      "word_count": 750,
+      "author_anonymous": true,
+      "social_hashtags": ["#Courage", "#FamilyAdventures", "#DadWisdom", "#Growth"],
+      "media_assets": [
+        "dad-kids-beach-02.jpg"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_scheduled": 3,
+    "total_published": 3,
+    "next_publish": "2026-08-29",
+    "media_folder": "/public/media/beach-2026-08-23/",
+    "last_updated": "2026-08-23",
+    "publishing_frequency": "weekly"
+  }
+}
