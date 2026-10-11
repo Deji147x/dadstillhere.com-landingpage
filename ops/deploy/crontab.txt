@@ -1,0 +1,18 @@
+# dadstillhere.com — installed by deploy/ops-install.sh. Every job goes through dsh-run:
+# locked, logged to /var/log/dsh/<job>.log, retried where safe, pinged to healthchecks.io, alerted on fail.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+
+# 06:05 blog — publishes the day's entry (backs up, verifies, rolls back on a broken homepage)
+5 6 * * *   RETRIES=3 dsh-run blog bash /opt/dsh/deploy/publish-blog.sh
+# 07:00 watchdog — was today's entry actually published?
+0 7 * * *   dsh-run watch dsh-watch
+# 09:00 social — Facebook (and Instagram once linked). Dedupe makes retries safe. Never batch a backlog.
+0 9 * * *   RETRIES=2 dsh-run social bash -c 'cd /opt/dsh && set -a && . /etc/dsh/social.env && set +a && node tools/post-social.mjs --all --limit 1'
+# 10:00 watchdog — did it post?
+0 10 * * *  dsh-run watch dsh-watch
+# 03:15 encrypted offsite backup; Sundays also test-restore
+15 3 * * *  RETRIES=2 dsh-run backup dsh-backup
+# Sunday 07:30 — weekly letter draft
+30 7 * * 0  dsh-run letter bash -c 'cd /opt/dsh && node tools/draft-letter.mjs --week'
