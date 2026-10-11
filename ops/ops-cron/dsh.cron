@@ -1,0 +1,14 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+5 6 * * *   RETRIES=3 dsh-run blog bash /opt/dsh/deploy/publish-blog.sh
+0 7 * * *   dsh-run watch dsh-watch
+0 9 * * *   RETRIES=2 dsh-run social bash -c 'cd /opt/dsh && set -a && . /etc/dsh/social.env && set +a && node tools/social-kit.mjs && node tools/post-social.mjs'
+0 10 * * *  dsh-run watch dsh-watch
+#15 3 * * * RETRIES=2 dsh-run backup dsh-backup
+#30 7 * * 0  dsh-run letter bash -c 'cd /opt/dsh && node tools/draft-letter.mjs --week'
+0 4 * * 1  dsh-run threads-token dsh-threads-refresh
+0 18 * * *  RETRIES=2 dsh-run archive bash -c 'cd /opt/dsh && set -a && . /etc/dsh/social.env && set +a && node tools/post-archive.mjs'
+0 13 * * 1  dsh-run gbp-nudge dsh-gbp-nudge
+30 6 * * *  RETRIES=2 dsh-run seo dsh-seo
+0 14 14 10 *  curl -fsS -H 'Title: Reminder: HubSpot forms' -H 'Tags: memo' -d 'Create 2 embedded forms (DSH Subscribe, DSH Story) in HubSpot and send the form IDs. # hubspot-reminder' https://ntfy.sh/dsh-alerts-895d8a949d3e >/dev/null
